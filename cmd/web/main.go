@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/BirykovRV/miniature-broccoli/internal/lib"
 )
 
 type application struct {
@@ -21,8 +19,6 @@ type config struct {
 }
 
 func main() {
-	mux := http.NewServeMux()
-
 	var cfg config
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -38,21 +34,10 @@ func main() {
 	flag.StringVar(&cfg.environment, "env", "dev", "Set environment of App")
 	flag.Parse()
 
-	fileServer := http.FileServer(lib.NeuteredFileSystem{
-		Fs: http.Dir(cfg.staticDir),
-	})
-
-	mux.Handle("/static", http.NotFoundHandler())
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
-
 	srv := &http.Server{
 		Addr:     cfg.addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routes(cfg),
 	}
 
 	infoLog.Printf("Starting server on %s with environment setting: %s", cfg.addr, cfg.environment)
