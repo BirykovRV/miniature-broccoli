@@ -1,0 +1,21 @@
+{{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
+
+{{define "main"}}
+    {{with .Snippet}}
+        <div class='snippet'>
+            <div class='metadata'>
+                <strong>{{.Title}}</strong>
+                <span>#{{.ID}}</span>
+            </div>            
+            <pre><code>{{.Content}}</code></pre>
+            <div class='metadata'>
+                <time>{{.Created | humanDate | printf "Created: %s"}}</time>
+                <time>Expires: {{humanDate .Expires}}</time>
+            </div>
+        </div>
+        <button 
+        hx-delete="/snippet/{{.ID}}" 
+        hx-confirm="Are you sure you wish to delete this snippet?"
+        type="button">Delete</button>
+    {{end}}
+{{end}}
