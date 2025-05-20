@@ -4,33 +4,38 @@ import (
 	"net/http"
 
 	"github.com/BirykovRV/miniature-broccoli/internal/lib"
+	"github.com/BirykovRV/miniature-broccoli/ui"
 )
 
 func (app *application) routes(cfg config) http.Handler {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(lib.NeuteredFileSystem{
-		Fs: http.Dir(cfg.staticDir),
-	})
+	// fileServer := http.FileServer(lib.NeuteredFileSystem{
+	// 	Fs: http.Dir(cfg.staticDir),
+	// })
+	fileServer := http.FileServer(http.FS(ui.Files))
 
 	mux.Handle("/static", http.NotFoundHandler())
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	//mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", fileServer)
 
-	baseChain := lib.Chain{app.sessionManager.LoadAndSave,
+	baseChain := lib.Chain{
 		app.recoverPanic,
 		app.logRequest,
 		secureHeaders,
 	}
 
-	authChain := append(baseChain, app.requireAuthentication)
+	dynamic := append(baseChain, app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 
-	mux.Handle("/", baseChain.ThenFunc(app.home))
-	mux.Handle("/snippet/{id}", baseChain.ThenFunc(app.snippetView))
+	authChain := append(dynamic, app.requireAuthentication)
 
-	mux.Handle("/user/signup", baseChain.ThenFunc(app.userSignup))
-	mux.Handle("POST /user/signup", baseChain.ThenFunc(app.userSignupPost))
-	mux.Handle("/user/login", baseChain.ThenFunc(app.userLogin))
-	mux.Handle("POST /user/login", baseChain.ThenFunc(app.userLoginPost))
+	mux.Handle("/", dynamic.ThenFunc(app.home))
+	mux.Handle("/snippet/{id}", dynamic.ThenFunc(app.snippetView))
+
+	mux.Handle("/user/signup", dynamic.ThenFunc(app.userSignup))
+	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.userSignupPost))
+	mux.Handle("/user/login", dynamic.ThenFunc(app.userLogin))
+	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
 	// protected app routes
 	mux.Handle("DELETE /snippet/{id}", authChain.ThenFunc(app.snippetDelete))
 	mux.Handle("GET /snippet/create", authChain.ThenFunc(app.snippetCreate))
