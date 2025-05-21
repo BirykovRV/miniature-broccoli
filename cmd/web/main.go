@@ -79,7 +79,7 @@ func main() {
 	srv := &http.Server{
 		Addr:         cfg.addr,
 		ErrorLog:     app.errorLog,
-		Handler:      app.routes(cfg),
+		Handler:      app.routes(),
 		TLSConfig:    tlsConfig,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

@@ -7,7 +7,7 @@ import (
 	"github.com/BirykovRV/miniature-broccoli/ui"
 )
 
-func (app *application) routes(cfg config) http.Handler {
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	// fileServer := http.FileServer(lib.NeuteredFileSystem{
@@ -24,9 +24,10 @@ func (app *application) routes(cfg config) http.Handler {
 		app.logRequest,
 		secureHeaders,
 	}
+	// health check handler
+	mux.Handle("/ping", baseChain.ThenFunc(ping))
 
 	dynamic := append(baseChain, app.sessionManager.LoadAndSave, noSurf, app.authenticate)
-
 	authChain := append(dynamic, app.requireAuthentication)
 
 	mux.Handle("/", dynamic.ThenFunc(app.home))
