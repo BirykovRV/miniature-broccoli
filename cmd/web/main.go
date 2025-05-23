@@ -25,6 +25,7 @@ type application struct {
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
+	*config
 }
 
 type config struct {
@@ -32,6 +33,7 @@ type config struct {
 	staticDir   string
 	environment string
 	dsn         string
+	debugMode   bool
 }
 
 func main() {
@@ -40,6 +42,7 @@ func main() {
 	flag.StringVar(&cfg.staticDir, "static", "./ui/static/", "Static files web directory")
 	flag.StringVar(&cfg.environment, "env", "dev", "Set environment of App")
 	flag.StringVar(&cfg.dsn, "dsn", "web:Trd19afo@(127.0.0.1:3307)/snippetbox?parseTime=true", "MySQL data source name")
+	flag.BoolVar(&cfg.debugMode, "debug", false, "Enable or disable Debug mode")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -70,6 +73,7 @@ func main() {
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
+		config:         &cfg,
 	}
 
 	tlsConfig := &tls.Config{

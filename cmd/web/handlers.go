@@ -49,6 +49,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl.html", data)
 }
 
+func (app application) aboutView(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "about.tmpl.html", data)
+}
+
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(r.PathValue("id"))
@@ -157,6 +162,7 @@ func (app *application) snippetDelete(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully deleted!")
 	w.Header().Add("HX-Redirect", "/")
 }
 
@@ -217,7 +223,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, http.StatusUnprocessableEntity, "signup.tmlp.html", data)
+		app.render(w, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
 		return
 	}
 
@@ -228,11 +234,10 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 
 			data := app.newTemplateData(r)
 			data.Form = form
-			app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			app.render(w, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
 		} else {
 			app.serverError(w, err)
 		}
-
 		return
 	}
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
