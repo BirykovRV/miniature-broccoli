@@ -9,6 +9,7 @@
     </div>
     <div>        
         {{if .IsAuthenticated}}
+            <a href='/account'>Account</a>
             <form method="post" action='/user/logout'>
                 <!-- Include the CSRF token -->
                 <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
@@ -19,7 +20,5 @@
             <a href='/user/login'>Login</a>
         {{end}}
     </div>
-    
-
 </nav>
 {{end}}

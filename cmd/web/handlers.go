@@ -31,6 +31,13 @@ type userLoginForm struct {
 	validator.Validator `form:"-"`
 }
 
+type accountPasswordUpdateForm struct {
+	CurrentPassword     string `form:"current_password"`
+	NewPassword1        string `form:"new_password1"`
+	NewPassword2        string `form:"new_password2"`
+	validator.Validator `form:"-"`
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
@@ -290,7 +297,39 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
+	url := app.sessionManager.PopString(r.Context(), "last_url")
+	if url != "" {
+		http.Redirect(w, r, url, http.StatusSeeOther)
+		return
+	}
+
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+}
+
+func (app application) accountView(w http.ResponseWriter, r *http.Request) {
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	user, err := app.users.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	data := app.newTemplateData(r)
+	data.User = user
+	app.render(w, http.StatusOK, "account.tmpl.html", data)
+}
+
+func (app application) accountPasswordUpdate(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = accountPasswordUpdateForm{}
+	app.render(w, http.StatusOK, "password.tmpl.html", data)
+}
+
+func (app application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {

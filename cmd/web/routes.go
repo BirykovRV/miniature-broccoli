@@ -39,6 +39,9 @@ func (app *application) routes() http.Handler {
 	mux.Handle("/user/login", dynamic.ThenFunc(app.userLogin))
 	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
 	// protected app routes
+	mux.Handle("/account", authChain.ThenFunc(app.accountView))
+	mux.Handle("/account/password/update", authChain.ThenFunc(app.accountPasswordUpdate))
+	mux.Handle("POST /account/password/update", authChain.ThenFunc(app.accountPasswordUpdatePost))
 	mux.Handle("DELETE /snippet/{id}", authChain.ThenFunc(app.snippetDelete))
 	mux.Handle("GET /snippet/create", authChain.ThenFunc(app.snippetCreate))
 	mux.Handle("POST /snippet/create", authChain.ThenFunc(app.snippetCreatePost))

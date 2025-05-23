@@ -82,20 +82,20 @@ func newTestServer(t *testing.T, h http.Handler) *testServer {
 // Implement a get() method on our custom testServer type. This makes a GET
 // request to a given url path using the test server client, and returns the
 // response status code, headers and body.
-func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, string) {
+func (ts *testServer) get(t *testing.T, urlPath string) (statusCode int, h http.Header, body string) {
 	rs, err := ts.Client().Get(ts.URL + urlPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	defer rs.Body.Close()
-	body, err := io.ReadAll(rs.Body)
+	b, err := io.ReadAll(rs.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes.TrimSpace(body)
+	bytes.TrimSpace(b)
 
-	return rs.StatusCode, rs.Header, string(body)
+	return rs.StatusCode, rs.Header, string(b)
 }
 
 // Create a postForm method for sending POST requests to the test server. The
