@@ -41,7 +41,7 @@ func main() {
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address or port [:4000]")
 	flag.StringVar(&cfg.staticDir, "static", "./ui/static/", "Static files web directory")
 	flag.StringVar(&cfg.environment, "env", "dev", "Set environment of App")
-	flag.StringVar(&cfg.dsn, "dsn", "web:Trd19afo@(127.0.0.1:3307)/snippetbox?parseTime=true", "MySQL data source name")
+	flag.StringVar(&cfg.dsn, "dsn", "web:pa$$word@(127.0.0.1:3307)/snippetbox?parseTime=true", "MySQL data source name")
 	flag.BoolVar(&cfg.debugMode, "debug", false, "Enable or disable Debug mode")
 	flag.Parse()
 
